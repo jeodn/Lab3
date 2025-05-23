@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +15,7 @@ import java.util.Map;
 public class LanguageCodeConverter {
 
     // TODO Task: pick appropriate instance variables to store the data necessary for this class
-
+    public Map<String, String> languagesCodes = new HashMap<>();
     /**
      * Default constructor which will load the language codes from "language-codes.txt"
      * in the resources folder.
@@ -37,11 +38,25 @@ public class LanguageCodeConverter {
             // TODO Task: use lines to populate the instance variable
             //           tip: you might find it convenient to create an iterator using lines.iterator()
 
-        // TODO Checkstyle: '}' on next line should be alone on a line.
-        } catch (IOException | URISyntaxException ex) {
+            Iterator<String> iterator = lines.iterator(); // quickly populate with Iterator
+            if(iterator.hasNext()){ // skip first line
+                iterator.next();
+            }
+            while(iterator.hasNext()){ // populate Hashmap {language=code, .....}
+                String line = iterator.next().trim();
+                String[] parts = line.split("\\s+");
+                if(parts.length >= 2){
+                    String language = parts[parts.length - 1];
+                    String code = String.join(" ", java.util.Arrays
+                            .copyOfRange(parts, 0, parts.length - 1));
+                    this.languagesCodes.put(language, code); // now hashmap is populated
+                }
+            }
+
+        }
+        catch (IOException | URISyntaxException ex) {
             throw new RuntimeException(ex);
         }
-
     }
 
     /**
@@ -51,7 +66,12 @@ public class LanguageCodeConverter {
      */
     public String fromLanguageCode(String code) {
         // TODO Task: update this code to use your instance variable to return the correct value
-        return code;
+        for (Map.Entry<String, String> entry : this.languagesCodes.entrySet()) { // use entryset to loop entire hashmap
+            if (entry.getValue().equals(code)) {
+                return entry.getKey();
+            }
+        }
+        return "Provided country code does not exist";
     }
 
     /**
@@ -61,7 +81,12 @@ public class LanguageCodeConverter {
      */
     public String fromLanguage(String language) {
         // TODO Task: update this code to use your instance variable to return the correct value
-        return language;
+        for(Map.Entry<String, String> entry : this.languagesCodes.entrySet()){
+            if(entry.getKey().equals(language)){
+                return entry.getValue();
+            }
+        }
+        return "Provided language does not exist";
     }
 
     /**
@@ -70,6 +95,11 @@ public class LanguageCodeConverter {
      */
     public int getNumLanguages() {
         // TODO Task: update this code to use your instance variable to return the correct value
-        return 0;
+        int counter = 0;
+        for(String languages: this.languagesCodes.keySet()){
+            counter++;
+        }
+        return counter;
+
     }
 }
