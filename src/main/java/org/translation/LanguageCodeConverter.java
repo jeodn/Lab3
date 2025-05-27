@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -13,12 +14,13 @@ import java.util.Map;
  */
 public class LanguageCodeConverter {
 
-    // TODO Task: pick appropriate instance variables to store the data necessary for this class
+    private final Map<String, String> languageCodes = new HashMap<>();
 
     /**
      * Default constructor which will load the language codes from "language-codes.txt"
      * in the resources folder.
      */
+
     public LanguageCodeConverter() {
         this("language-codes.txt");
     }
@@ -34,14 +36,30 @@ public class LanguageCodeConverter {
             List<String> lines = Files.readAllLines(Paths.get(getClass()
                     .getClassLoader().getResource(filename).toURI()));
 
-            // TODO Task: use lines to populate the instance variable
-            //           tip: you might find it convenient to create an iterator using lines.iterator()
+            Iterator<String> iterator = lines.iterator();
 
-        // TODO Checkstyle: '}' on next line should be alone on a line.
-        } catch (IOException | URISyntaxException ex) {
+            if (iterator.hasNext()) {
+                iterator.next();
+            }
+
+            // populate the hashmap instance variable
+            while (iterator.hasNext()) {
+                String line = iterator.next().trim();
+                if (line.isEmpty()) {
+                    continue;
+                }
+                String[] parts = line.split("\\s+");
+                if (parts.length >= 2) {
+                    String code = parts[parts.length - 1].toLowerCase();
+                    String language = String.join(" ", java.util.Arrays
+                            .copyOfRange(parts, 0, parts.length - 1));
+                    this.languageCodes.put(language, code);
+                }
+            }
+        }
+        catch (IOException | URISyntaxException ex) {
             throw new RuntimeException(ex);
         }
-
     }
 
     /**
@@ -50,8 +68,14 @@ public class LanguageCodeConverter {
      * @return the name of the language corresponding to the code
      */
     public String fromLanguageCode(String code) {
-        // TODO Task: update this code to use your instance variable to return the correct value
-        return code;
+        String normal = code.toLowerCase();
+        // use entryset to loop through entire hashmap
+        for (Map.Entry<String, String> entry : this.languageCodes.entrySet()) {
+            if (entry.getValue().equals(normal)) {
+                return entry.getKey();
+            }
+        }
+        return "Provided country code does not exist";
     }
 
     /**
@@ -60,8 +84,12 @@ public class LanguageCodeConverter {
      * @return the 2-letter code of the language
      */
     public String fromLanguage(String language) {
-        // TODO Task: update this code to use your instance variable to return the correct value
-        return language;
+        for (Map.Entry<String, String> entry : this.languageCodes.entrySet()) {
+            if (entry.getKey().equals(language)) {
+                return entry.getValue();
+            }
+        }
+        return "Provided country Name does not exist";
     }
 
     /**
@@ -69,7 +97,6 @@ public class LanguageCodeConverter {
      * @return how many languages are included in this code converter.
      */
     public int getNumLanguages() {
-        // TODO Task: update this code to use your instance variable to return the correct value
-        return 0;
+        return this.languageCodes.size();
     }
 }
